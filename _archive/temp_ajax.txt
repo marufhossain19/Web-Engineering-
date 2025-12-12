@@ -1,0 +1,70 @@
+
+        
+        // Toggle Search Bar
+        const toggleSearchBtn = document.getElementById('toggleSearchBtn');
+        const filterBar = document.getElementById('filterBar');
+        let isFilterBarVisible = false;
+        
+        toggleSearchBtn.addEventListener('click', function() {
+            isFilterBarVisible = !isFilterBarVisible;
+            if (isFilterBarVisible) {
+                filterBar.style.display = 'block';
+                setTimeout(() => {
+                    filterBar.style.opacity = '1';
+                }, 10);
+            } else {
+                filterBar.style.opacity = '0';
+                setTimeout(() => {
+                    filterBar.style.display = 'none';
+                }, 300);
+            }
+        });
+        
+        // AJAX Search Functionality
+        const searchInput = document.getElementById('searchInput');
+        const semesterFilter = document.getElementById('semesterFilter');
+        const yearFilter = document.getElementById('yearFilter');
+        const notesGrid = document.getElementById('notesGrid');
+        const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+        
+        let searchTimeout;
+        
+        function performSearch() {
+            const search = searchInput.value;
+            const semester = semesterFilter.value;
+            const year = yearFilter.value;
+            
+            const params = new URLSearchParams({
+                search: search,
+                semester: semester,
+                year: year
+            });
+            
+            fetch('search_notes_ajax.php?' + params.toString())
+                .then(response => response.text())
+                .then(html => {
+                    notesGrid.innerHTML = html;
+                })
+                .catch(error => {
+                    console.error('Search error:', error);
+                });
+        }
+        
+        // Debounced search on input
+        searchInput.addEventListener('keyup', function() {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(performSearch, 300);
+        });
+        
+        // Immediate search on filter change
+        semesterFilter.addEventListener('change', performSearch);
+        yearFilter.addEventListener('change', performSearch);
+        
+        // Clear filters
+        clearFiltersBtn.addEventListener('click', function() {
+            searchInput.value = '';
+            semesterFilter.value = '';
+            yearFilter.value = '';
+            performSearch();
+        });
+    </script>
